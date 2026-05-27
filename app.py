@@ -32,7 +32,7 @@ st.title("🚀 Vidya V3 — Milestone Testing Lab")
 st.markdown("""
 Internal testing dashboard for:
 
-- M01 → M07 milestone generation
+- Milestone generation
 - ICP personalization testing
 - learner-state testing
 - onboarding-summary testing
@@ -267,163 +267,206 @@ ONBOARDING SUMMARY:
             )
 
         # =====================================================
-        # FULL ROADMAP JSON
+        # COURSE OVERVIEW
         # =====================================================
 
         st.divider()
 
-        st.header("📚 Full Roadmap JSON")
+        st.header("📘 Course Overview")
 
-        st.json(roadmap_data)
+        st.subheader(
+            roadmap_data.get("CourseTitle", "")
+        )
+
+        st.write(
+            roadmap_data.get("CourseDescription", "")
+        )
 
         # =====================================================
-        # MILESTONE JSON
+        # VISUAL MILESTONES
         # =====================================================
 
         milestones = roadmap_data.get("Milestones", [])
 
         st.divider()
 
-        st.header("🚀 Milestone JSON Output")
-
-        st.json(milestones)
-
-        # =====================================================
-        # VISUAL MILESTONES
-        # =====================================================
-
-        st.divider()
-
-        st.header("🎯 Milestone Visualization")
+        st.header("🚀 Career Milestones")
 
         for milestone in milestones:
 
             module_data = milestone.get("modules", {})
 
-            expander_title = (
-                f"{module_data.get('module_id', '')}"
-                f" • "
-                f"{milestone.get('title', '')}"
-            )
+            with st.container(border=True):
 
-            with st.expander(expander_title):
+                top1, top2 = st.columns([4, 1])
 
-                st.subheader(
-                    milestone.get("role", "")
-                )
+                with top1:
+
+                    st.subheader(
+                        f'{module_data.get("module_id")} • {milestone.get("title")}'
+                    )
+
+                    st.caption(
+                        milestone.get("role", "")
+                    )
+
+                with top2:
+
+                    st.metric(
+                        "Market Value",
+                        milestone.get("market_value", "")
+                    )
 
                 st.write(
                     milestone.get("description", "")
                 )
 
                 st.info(
-                    milestone.get("quote", "")
+                    f'💬 "{milestone.get("quote", "")}"'
                 )
 
                 # =====================================================
-                # TWO COLUMNS
+                # SKILLS / GAPS / OPPORTUNITIES
                 # =====================================================
 
-                colA, colB = st.columns(2)
-
-                # =====================================================
-                # LEFT COLUMN
-                # =====================================================
+                colA, colB, colC = st.columns(3)
 
                 with colA:
 
-                    st.write("### Skills")
+                    st.markdown("### 🧠 Skills")
 
                     for skill in milestone.get("skills", []):
 
                         st.success(skill)
 
-                    st.write("### Gaps")
+                with colB:
+
+                    st.markdown("### ⚠ Gaps")
 
                     for gap in milestone.get("gaps", []):
 
                         st.error(gap)
 
-                # =====================================================
-                # RIGHT COLUMN
-                # =====================================================
+                with colC:
 
-                with colB:
+                    st.markdown("### 🚀 Opportunities")
 
-                    st.write("### Career Progression")
-
-                    for item in milestone.get(
-                        "career_progression",
-                        []
-                    ):
-
-                        st.write(f"✅ {item}")
-
-                    st.write("### New Opportunities")
-
-                    for item in milestone.get(
+                    for opp in milestone.get(
                         "new_opportunities",
                         []
                     ):
 
-                        st.write(f"🚀 {item}")
+                        st.info(opp)
 
                 # =====================================================
-                # MARKET VALUE
+                # CAREER PROGRESSION
                 # =====================================================
 
-                st.write("### Market Value")
+                st.markdown("### 📈 Career Progression")
 
-                st.warning(
-                    milestone.get("market_value", "")
-                )
+                for item in milestone.get(
+                    "career_progression",
+                    []
+                ):
+
+                    st.write(f"✅ {item}")
 
                 # =====================================================
-                # WEEKLY BREAKDOWN
+                # WEEKLY PROGRESSION
                 # =====================================================
 
-                st.write("### Weekly Progression")
+                st.markdown("### 📅 Weekly Progression")
 
                 weeks = module_data.get("weeks", [])
 
                 for week in weeks:
 
+                    week_col1, week_col2 = st.columns([2, 5])
+
                     status = week.get("status")
 
                     if status == "completed":
-
                         emoji = "✅"
 
                     elif status == "active":
-
                         emoji = "🔥"
 
                     else:
-
                         emoji = "🔒"
 
-                    st.write(
-                        f"{emoji} Week "
-                        f"{week.get('week')} "
-                        f"— "
-                        f"{week.get('focus')}"
-                    )
+                    with week_col1:
 
-                    skills = week.get("skills", [])
-
-                    if skills:
-
-                        st.caption(
-                            ", ".join(skills)
+                        st.write(
+                            f"{emoji} Week {week.get('week')}"
                         )
 
-                    mastery = week.get(
-                        "mastery_at_end"
-                    )
+                    with week_col2:
 
-                    if mastery is not None:
+                        st.write(
+                            week.get("focus")
+                        )
 
-                        st.progress(float(mastery))
+                        skills = week.get(
+                            "skills",
+                            []
+                        )
+
+                        if skills:
+
+                            st.caption(
+                                " • ".join(skills)
+                            )
+
+                        mastery = week.get(
+                            "mastery_at_end"
+                        )
+
+                        if mastery is not None:
+
+                            st.progress(float(mastery))
+
+        # =====================================================
+        # MODULE BREAKDOWN
+        # =====================================================
+
+        st.divider()
+
+        st.header("📚 Learning Modules")
+
+        modules = roadmap_data.get("Modules", [])
+
+        for module in modules:
+
+            with st.expander(
+                f'Week {module.get("Week")} • {module.get("ModuleName")}'
+            ):
+
+                st.write(
+                    module.get("Description")
+                )
+
+                st.markdown("### Topics")
+
+                for topic in module.get(
+                    "Topics",
+                    []
+                ):
+
+                    st.write(f"• {topic}")
+
+        # =====================================================
+        # RAW JSON VIEW
+        # =====================================================
+
+        st.divider()
+
+        with st.expander("🧾 Full Roadmap JSON"):
+
+            st.json(roadmap_data)
+
+        with st.expander("🧱 Milestones JSON"):
+
+            st.json(milestones)
 
         # =====================================================
         # DOWNLOAD SECTION
